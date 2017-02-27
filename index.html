@@ -1,47 +1,86 @@
+<!-- This page is created by @Dr10_TakeHiro. -->
+
+<!-- This page uses jQuery. Original library is available in https://jquery.com/ -->
+<script type="text/javascript" src="./js/jquery-3.1.1.slim.min.js"></script>
+<!-- This page uses bootstrap. Original library is available in http://getbootstrap.com/ -->
+<script type="text/javascript" src="./js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css" media="screen, projection" />
+<!-- This page uses ccchart. Original library is available in http://github.com/toshirot/ccchart/ -->
+<script type="text/javascript" src="./js/ccchart.js"></script>
+
 <!DOCTYPE html>
 <html>
-
-<!-- This page uses ccchart by toshirot. Original library is available in http://github.com/toshirot/ccchart/ -->
-<script src="./ccchart.js" charset="utf-8"></script>
-
 <head>
 	<meta charset="UTF-8">
 	<title>2つの正規分布とその差の確立分布</title>
 </head>
 
-<body>
+<body style="margin: 20px 20px">
 	<h1>2つの正規分布とその差の確立分布</h1>
 	<div class="content examples">
 		<div class="wrapper">
-			<h2>Input</h2>
-			<form oninput="draw_graph(Number(a.value), Number(b.value), Number(c.value), Number(d.value))" style="margin-bottom:4em;">
-				<h3>分布1</h3>
-					<math xmlns="https://www.w3.org/1998/Math/MathML/">
-						<msub><mi>&mu;</mi><mn>1</mn></msub>
-					</math>
-						<input name="a" value="0" size="10" type="number">
-					<math xmlns="https://www.w3.org/1998/Math/MathML/">
-						<msub><mi>&sigma;</mi><mn>1</mn></msub>
-					</math>
-						<input name="b" value="1" size="10" type="number" min="1">
-				<br>
-				<h3>分布2</h3>
-					<math xmlns="https://www.w3.org/1998/Math/MathML/">
-						<msub><mi>&mu;</mi><mn>2</mn></msub>
-					</math>
-						<input name="c" value="0" size="10" type="number">
-					<math xmlns="https://www.w3.org/1998/Math/MathML/">
-						<msub><mi>&sigma;</mi><mn>2</mn></msub>
-					</math>						
-						<input name="d" value="1" size="10" type="number" min="1">
-				</output>
+			<form oninput="redraw()">
+				<div class="row">
+					<div class="col-sm-6" id="distribution-div">
+						<div class="panel panel-primary">
+							<div class="panel-heading">
+								<h3 class="panel-title">分布1</h3>
+							</div>
+							<div class="panel-body">
+								<div class="row">
+									<div class="col-sm-6" id="distribution-div">
+										平均
+										<input name="mean1" value="0" size="10" type="number">
+									</div>
+									<div class="col-sm-6" id="distribution-div">
+										分散
+										<input name="dist1" value="1" size="10" type="number" min="1">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6" id="difference-div">
+						<div class="panel panel-primary">
+							<div class="panel-heading">
+								<h3 class="panel-title">分布2</h3>
+							</div>
+							<div class="panel-body">
+								<div class="row">
+									<div class="col-sm-6">
+										平均:<input name="mean2" value="0" size="10" type="number">
+									</div>
+									<div class="col-sm-6">
+										分散:<input name="dist2" value="1" size="10" type="number" min="1">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</form>
-			<h2>Output</h2>
-			<div id="holder"></div>
-			<h3>分布1と分布2の確率分布</h2>
-				<canvas id="Distribution"></canvas>
-			<h3>分布2-分布1の確率分布</h2>
-				<canvas id="Difference"></canvas>
+			<div class="row">
+				<div class="col-sm-6" id="distribution-div">
+					<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3>分布1と分布2の確率分布</h3>
+						</div>
+						<div class="panel-body">
+							<canvas id="Distribution" style="margin: 0 auto;"></canvas>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6" id="difference-div">
+					<div class="panel panel-primary">
+						<div class="panel-heading">
+							<h3>分布2-分布1の確率分布</h3>
+						</div>
+						<div class="panel-body">
+							<canvas id="Difference" style="margin: 0 auto;"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
@@ -71,22 +110,22 @@
 		}
 		return ar;
 	}
-	function wrap_area(x, y1, y2){
-		if(x.length != y1.length){ return 0; }
-		if(x.length != y2.length){ return 0; }
+	function wrap_area(x, y1, y2) {
+		if (x.length != y1.length) { return 0; }
+		if (x.length != y2.length) { return 0; }
 		var area = 0;
-		for(var i = 0;i<x.length-1;i++){
-			area = area + (x[i+1]-x[i])*Math.min(y1[i]+y1[i+1],y2[i]+y2[i+1])/2;
+		for (var i = 0; i < x.length - 1; i++) {
+			area = area + (x[i + 1] - x[i]) * Math.min(y1[i] + y1[i + 1], y2[i] + y2[i + 1]) / 2;
 		}
 		return area;
 	}
-	function positive_area(x, y){
+	function positive_area(x, y) {
 		var area = 0;
-		for(var i = 0;i<x.length-1;i++){
-			if(x[i+1]+x[i]<0){continue;}
-			area = area + (x[i+1]-x[i])*(y[i]+y[i+1])/2;
+		for (var i = 0; i < x.length - 1; i++) {
+			if (x[i + 1] + x[i] < 0) { continue; }
+			area = area + (x[i + 1] - x[i]) * (y[i] + y[i + 1]) / 2;
 		}
-		return round(area,2);
+		return round(area, 2);
 	}
 	function draw_graph(mu1, sigma1, mu2, sigma2) {
 		var x_min = Math.min(-3 * sigma1 + mu1, -3 * sigma2 + mu2);
@@ -96,10 +135,11 @@
 		var y2 = normpdf(x, mu2, sigma2);
 		var distribution_data = {
 			"config": {
-				"title": "Wrap area is "+round(wrap_area(x,y1,y2)*100,0)+"%",
+				"title": "Wrap area is " + round(wrap_area(x, y1, y2) * 100, 0) + "%",
 				"type": "area",
 				"xScaleSkip": 100,
-				"colorSet":["rgba(255,0,0,0.3)","rgba(0,0,255,0.3)"]
+				"colorSet": ["rgba(255,0,0,0.3)", "rgba(0,0,255,0.3)"],
+				"width": document.getElementById("distribution-div").clientWidth * 0.8,
 			},
 			"data": [
 				["value"].concat(x),
@@ -110,18 +150,19 @@
 		ccchart.init("Distribution", distribution_data);
 
 		var mu_diff = mu2 - mu1;
-		var sigma_diff = Math.sqrt(sigma1*sigma1+sigma2*sigma2);
-		
-		var x_min = Math.min( Math.round(-3*sigma_diff+mu_diff), -Math.round(3*sigma_diff+mu_diff));
-		var x_max = Math.max( -Math.round(-3*sigma_diff+mu_diff), Math.round(3*sigma_diff+mu_diff));
+		var sigma_diff = Math.sqrt(sigma1 * sigma1 + sigma2 * sigma2);
+
+		var x_min = Math.min(Math.round(-3 * sigma_diff + mu_diff), -Math.round(3 * sigma_diff + mu_diff));
+		var x_max = Math.max(-Math.round(-3 * sigma_diff + mu_diff), Math.round(3 * sigma_diff + mu_diff));
 		var x_diff = linspace(x_min, x_max, 1001);
 		var y_diff = normpdf(x_diff, mu_diff, sigma_diff);
 		var diff_data = {
 			"config": {
-				"title": "Dist1 < Dist2 : "+positive_area(x_diff,y_diff)*100+"%",
+				"title": "Dist1 < Dist2 : " + positive_area(x_diff, y_diff) * 100 + "%",
 				"type": "area",
 				"xScaleSkip": 100,
-				"colorSet":["rgba(255,0,255,0.3)"]
+				"colorSet": ["rgba(255,0,255,0.3)"],
+				"width": document.getElementById("difference-div").clientWidth * 0.8,
 			},
 			"data": [
 				[""].concat(x_diff),
@@ -130,6 +171,17 @@
 		};
 		ccchart.init("Difference", diff_data);
 	}
+	function redraw(){
+		var mu1 = Number($("input[name='mean1']").val());
+		var mu2 = Number($("input[name='mean2']").val());
+		var sigma1 = Math.sqrt(Number($("input[name='dist1']").val()));
+		var sigma2 = Math.sqrt(Number($("input[name='dist2']").val()));
+		draw_graph(mu1, sigma1, mu2, sigma2);
+	}
+
+	$(window).resize(function () {
+		redraw();
+	});
 	draw_graph(0, 1, 0, 1);
 
 </script>
